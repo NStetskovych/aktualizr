@@ -20,7 +20,7 @@ TEST(CommandsTest, initiateDownload_sent) {
 
   DbusGateway gateway(conf, chan);
   std::string cmd = "python " + fake_path + "dbus_send.py initiateDownload";
-  system(cmd.c_str());
+  EXPECT_EQ(system(cmd.c_str()), 0);
   boost::shared_ptr<command::BaseCommand> command;
   *chan >> command;
 
@@ -36,7 +36,7 @@ TEST(CommandsTest, abortDownload_sent) {
 
   DbusGateway gateway(conf, chan);
   std::string cmd = "python " + fake_path + "dbus_send.py abortDownload";
-  system(cmd.c_str());
+  EXPECT_EQ(system(cmd.c_str()), 0);
   boost::shared_ptr<command::BaseCommand> command;
   *chan >> command;
 
@@ -52,7 +52,7 @@ TEST(CommandsTest, SendUpdateReport_sent) {
 
   DbusGateway gateway(conf, chan);
   std::string cmd = "python " + fake_path + "dbus_send.py updateReport";
-  system(cmd.c_str());
+  EXPECT_EQ(system(cmd.c_str()), 0);
   boost::shared_ptr<command::BaseCommand> command;
   *chan >> command;
 
@@ -132,7 +132,9 @@ int main(int argc, char** argv) {
   if (argc >= 2) {
     fake_path = argv[1];
     std::string cmd = "python " + fake_path + "dbus_recieve.py &";
-    system(cmd.c_str());
+    int ret = system(cmd.c_str());
+    if (ret != 0)
+      return ret;
     sleep(2);
   }
   return RUN_ALL_TESTS();

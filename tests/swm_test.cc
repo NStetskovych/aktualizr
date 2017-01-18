@@ -39,7 +39,9 @@ int main(int argc, char** argv) {
   if (argc >= 2) {
     fake_path = argv[1];
     std::string cmd = "python " + fake_path + "swm.py &";
-    system(cmd.c_str());
+    int ret = system(cmd.c_str());
+    if (ret != 0)
+      return ret;
     sleep(2);
   }
   return RUN_ALL_TESTS();

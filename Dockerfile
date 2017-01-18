@@ -1,19 +1,58 @@
-FROM ubuntu:xenial
+FROM debian:jessie-slim
 
-ENV HOME /source
-ENV DEBIAN_FRONTEND noninteractive
-RUN mkdir $HOME
-RUN apt-get update
-RUN apt-get -y install gcc g++ make cmake git psmisc dbus python-dbus python-gtk2 libdbus-1-dev
-RUN apt-get -y install libjansson-dev libgtest-dev google-mock libssl-dev autoconf automake pkg-config libtool libexpat1-dev libboost-program-options-dev libboost-test-dev libboost-regex-dev libboost-dev libboost-system-dev libboost-thread-dev libboost-log-dev libjsoncpp-dev curl libcurl4-openssl-dev
-RUN apt-get -y install lcov clang clang-format-3.8 
+RUN apt-get update && apt-get -y install \
+    autoconf \
+    automake \
+    clang \
+    cmake \
+    curl \
+    dbus \
+    g++ \
+    gcc \
+    git \
+    google-mock \
+    lcov \
+    libboost-dev \
+    libboost-log-dev \
+    libboost-program-options-dev \
+    libboost-regex-dev \
+    libboost-system-dev \
+    libboost-test-dev \
+    libboost-thread-dev \
+    libcurl4-openssl-dev \
+    libdbus-1-dev \
+    libexpat1-dev \
+    libgtest-dev \
+    libjansson-dev \
+    libjsoncpp-dev \
+    libssl-dev \
+    libtool \
+    make \
+    pkg-config \
+    psmisc \
+    python-dbus \
+    python-gtk2 \
+  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR $HOME
-COPY src/ $HOME/src/
-COPY distribution $HOME/distribution/
-COPY tests/ $HOME/tests/
-COPY third_party/ $HOME/third_party/
-COPY config/ $HOME/config/
-COPY cmake-modules/ $HOME/cmake-modules/
-COPY CMakeLists.txt $HOME/
-RUN mkdir $HOME/build
+# clang-format >= 3.8 required
+ARG llvm_toolchain=http://ftp.de.debian.org/debian/pool/main/l/llvm-toolchain-3.8
+ARG lib_llvm=${llvm_toolchain}/libllvm3.8_3.8.1-12~bpo8+1_amd64.deb
+ARG clang_format=${llvm_toolchain}/clang-format-3.8_3.8.1-12~bpo8+1_amd64.deb
+RUN curl -o libllvm.deb ${lib_llvm} \
+ && curl -o clang_format.deb ${clang_format} \
+ && dpkg -i libllvm.deb clang_format.deb \
+ && rm libllvm.deb clang_format.deb
+
+RUN git config --global user.name  "aktualizr" \
+ && git config --global user.email "support@advancedtelematic.com"
+
+ARG src_dir=/src
+COPY src/           ${src_dir}/src/
+COPY distribution   ${src_dir}/distribution/
+COPY tests/         ${src_dir}/tests/
+COPY third_party/   ${src_dir}/third_party/
+COPY config/        ${src_dir}/config/
+COPY cmake-modules/ ${src_dir}/cmake-modules/
+COPY CMakeLists.txt ${src_dir}/
+
+WORKDIR ${src_dir}
